@@ -5,6 +5,12 @@ Administration system for student registration and notification.
 This project was developed with `Python 3.7.2` and `MySQL 8.0`. Please make sure equivalent Python and MySQL versions are installed on your machine.
 
 ## Local Development
+### Installation
+After cloning this repository to your local directory, run the following to install the necessary Python packages.
+```
+pip install -r requirements.txt
+```
+
 ### Initialise databases
 Before doing any local development, please first run the following to initialise production and test databases. These databases are assumed to be accessible to only the `root` account. You will also be prompted to key in your `root` account password.
 ```
