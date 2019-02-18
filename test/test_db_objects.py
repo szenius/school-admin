@@ -38,7 +38,7 @@ class TestDbObjects(unittest.TestCase):
         teacher_email = "teacher@example.com"
         registration = Registration(teacher_email, None)
         expected_search_string = "SELECT student_email FROM registration reg WHERE reg.teacher_email = '{}';".format(teacher_email)
-        self.assertEquals(expected_search_string, registration.search_students())
+        self.assertEqual(expected_search_string, registration.search_students())
 
 
 if __name__ == '__main__':

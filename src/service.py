@@ -33,7 +33,6 @@ class RegistrationService(object):
 
     def write_registration(self, conn):
         try:
-            conn = mysql.connect()
             cursor = conn.cursor()
             
             for student_email in self.student_emails:
@@ -73,12 +72,19 @@ class CommonStudentsService(object):
         # Get list of common students from database
         try:
             conn = mysql.connect()
+            return self.get_common_students(conn)
+        finally:
+            conn.close()
+
+    def get_common_students(self, conn):
+        try:
             cursor = conn.cursor()
 
             results = []
             for teacher_email in self.teacher_emails:
                 registration = Registration(teacher_email, None)
                 cursor.execute(registration.search_students())
+                conn.commit()
 
                 if len(results) == 0:
                     results.extend(list(list(itertools.chain.from_iterable(cursor))))
@@ -91,7 +97,6 @@ class CommonStudentsService(object):
             return {"message": MSG_LIST_STUDENTS_SERVER_ERROR}, STATUS_CODE_SERVER_ERROR
         finally: 
             cursor.close()
-            conn.close()
 
     def is_valid_input(self):
         if not self.teacher_emails:
@@ -117,6 +122,12 @@ class SuspendStudentService(object):
         # Write suspension into student table
         try:
             conn = mysql.connect()
+            return self.write_suspension(conn)
+        finally:
+            conn.close()
+    
+    def write_suspension(self, conn):
+        try:
             cursor = conn.cursor()
 
             student = Student(self.student_email, 'true')
@@ -129,7 +140,6 @@ class SuspendStudentService(object):
             return {"message": MSG_SUSPENSION_SERVER_ERROR}, STATUS_CODE_SERVER_ERROR
         finally:
             cursor.close()
-            conn.close()
 
     def is_valid_input(self):
         return bool(self.student_email)
@@ -157,20 +167,24 @@ class StudentsToNotifyService(object):
         cands = list(set(cands))
 
         # Return only the students that are not suspended
-        student = Student(None, None)
         try:
             conn = mysql.connect()
+            return self.remove_suspended_students(conn, cands)
+        finally:
+            conn.close()
+    
+    def remove_suspended_students(self, conn, cands):
+        student = Student(None, None)
+        try:
             cursor = conn.cursor()
             cursor.execute(student.check_suspension(emails=cands))
             recipients = list(itertools.chain.from_iterable(cursor))
-
             return {"recipients": recipients}, STATUS_CODE_GET_SUCCESS
         except Exception as e:
             print(e)
             return MSG_NOTIFY_SERVER_ERROR, STATUS_CODE_SERVER_ERROR
         finally:
             cursor.close()
-            conn.close()
 
     def get_registered_students(self):
         common_students_service = CommonStudentsService(None, teacher_emails=[self.teacher_email])
