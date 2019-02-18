@@ -14,7 +14,7 @@ mysql -u root -p < sql/build_test_db.sql
 
 Each database consists of three tables `teacher`, `student` and `registration`. Take a look at the diagram below to see the entity relationship model.
 
-"ADD DIAGRAM HERE"
+![DB Entity RS Model](https://github.com/szenius/school-admin/blob/master/db_entity_rs_model.png)
 
 The tables `teacher` and `student` in the production database are also initialised with 9 emails each. Please refer to the [build script](https://github.com/szenius/school-admin/blob/master/sql/build_db.sql) to see the values added into the tables.
 
