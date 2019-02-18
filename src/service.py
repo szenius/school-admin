@@ -1,7 +1,7 @@
 import pymysql
-from response_templates import *
-from db_objects import Teacher, Student, Registration
-from db_config import mysql
+from .response_templates import *
+from .db_objects import Teacher, Student, Registration
+from .db_config import mysql
 import itertools
 import re
 
@@ -23,6 +23,13 @@ class RegistrationService(object):
         # Write registration to database
         try:
             conn = mysql.connect()
+            return self.write_registration(conn)
+        finally: 
+            conn.close()
+
+    def write_registration(self, conn):
+        try:
+            conn = mysql.connect()
             cursor = conn.cursor()
             
             for student_email in self.student_emails:
@@ -36,8 +43,7 @@ class RegistrationService(object):
             return {"message": MSG_REGISTRATION_SERVER_ERROR}, STATUS_CODE_SERVER_ERROR
         finally: 
             cursor.close()
-            conn.close()
-    
+            
     def is_valid_input(self):
         return self.teacher_email and self.student_emails and len(self.student_emails) != 0
 

@@ -1,7 +1,7 @@
-DROP DATABASE schooladmin;
+DROP DATABASE IF EXISTS testschooladmin;
 
-CREATE DATABASE schooladmin;
-USE schooladmin;
+CREATE DATABASE testschooladmin;
+USE testschooladmin;
 
 CREATE TABLE teacher ( 
     email varchar(254) NOT NULL PRIMARY KEY
