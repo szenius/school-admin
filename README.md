@@ -12,6 +12,9 @@ mysql -u root -p < sql/build_db.sql
 mysql -u root -p < sql/build_test_db.sql
 ```
 
+The diagram below shows the entity relationship model of the initialised databases.
+[PLACEHOLDER|alt=er_model]
+
 ### Starting the Flask application
 To start the Flask application, please run the following from the root directory.
 ```
