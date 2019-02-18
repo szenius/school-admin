@@ -28,5 +28,6 @@ python -m unittest discover
 
 ## Future Work
 * Deploying the API to a server for remote access
-* Further refactoring of service classes
+* Further refactoring of service classes into different files
+* Further refactoring of `src` into different packages
 * Improving on documentation
