@@ -1,7 +1,7 @@
 import pymysql
 from .response_templates import *
-from .db_objects import Teacher, Student, Registration
-from .db_config import mysql
+from ..db.db_objects import Teacher, Student, Registration
+from ..db.db_config import mysql
 import itertools
 import re
 

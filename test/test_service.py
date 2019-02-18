@@ -1,9 +1,9 @@
 import unittest
-from src.service import RegistrationService, CommonStudentsService, SuspendStudentService, StudentsToNotifyService
+from src.service.service import RegistrationService, CommonStudentsService, SuspendStudentService, StudentsToNotifyService
 from flask import Flask
 from flaskext.mysql import MySQL
 import json
-from src.response_templates import *
+from src.service.response_templates import *
 import itertools
 
 class TestService(unittest.TestCase):
