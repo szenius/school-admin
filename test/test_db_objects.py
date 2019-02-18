@@ -1,5 +1,5 @@
 import unittest
-from db_objects import Teacher, Student, Registration
+from src.db_objects import Teacher, Student, Registration
 
 class TestDbObjects(unittest.TestCase):
     def test_teacher_insert_string(self):
