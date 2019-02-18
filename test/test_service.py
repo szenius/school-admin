@@ -109,11 +109,11 @@ class TestService(unittest.TestCase):
             cursor.close()
             conn.close()
 
-    def test_mentioned_students(self):
+    def test_notify_mentioned_students(self):
         self.assertEqual(["student1@example.com", "student9@example.com"], StudentsToNotifyService(MockPostRequest({"teacher": "teacher1@example.com", "notification": "@student1@example.com, @student9@example.com"})).get_mentioned_students())
         self.assertEqual([], StudentsToNotifyService(MockPostRequest({"teacher": "teacher1@example.com", "notification": ""})).get_mentioned_students())
 
-    def test_remove_suspended_students(self):
+    def test_notify_remove_suspended_students(self):
         try:
             conn = self.mysql_test.connect()
 
