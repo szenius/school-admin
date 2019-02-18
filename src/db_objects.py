@@ -50,7 +50,7 @@ class Registration(object):
         self.teacher_email = teacher_email
         self.student_email = student_email
 
-        self.sql_insert_template = "INSERT INTO registration VALUES( '{}', '{}' );"
+        self.sql_insert_template = "INSERT INTO registration VALUES ( '{}', '{}' );"
         self.sql_search_students_template = "SELECT student_email FROM registration reg WHERE reg.teacher_email = '{}';"
 
     def insert_string(self):

@@ -1,6 +1,6 @@
-from app import app
 from flask import jsonify, flash, request
-from service import RegistrationService, CommonStudentsService, SuspendStudentService, StudentsToNotifyService
+from .service import RegistrationService, CommonStudentsService, SuspendStudentService, StudentsToNotifyService
+from .app import app
 
 @app.route('/api/register', methods=['POST'])
 def register_students():
@@ -42,5 +42,8 @@ def build_response(msg, status_code):
 def parse_registration_request(request_body):
     return request_body['teacher'], request_body['students']
 
-if __name__ == "__main__":
+def main():
     app.run()
+
+if __name__ == "__main__":
+    main()

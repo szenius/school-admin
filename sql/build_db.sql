@@ -1,4 +1,4 @@
-DROP DATABASE schooladmin;
+DROP DATABASE IF EXISTS schooladmin;
 
 CREATE DATABASE schooladmin;
 USE schooladmin;

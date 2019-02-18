@@ -1,7 +1,7 @@
 import pymysql
-from response_templates import *
-from db_objects import Teacher, Student, Registration
-from db_config import mysql
+from .response_templates import *
+from .db_objects import Teacher, Student, Registration
+from .db_config import mysql
 import itertools
 import re
 
@@ -12,8 +12,12 @@ class RegistrationService(object):
 
     def __init__(self, request):
         request_json = request.json
-        self.teacher_email = request_json['teacher']
-        self.student_emails = request_json['students']
+        if not ('teacher' in request_json and 'students' in request_json):
+            self.teacher_email = None
+            self.student_emails = None 
+        else:
+            self.teacher_email = request_json['teacher']
+            self.student_emails = request_json['students']
 
     def register_students(self):
         # Input validation
@@ -23,6 +27,12 @@ class RegistrationService(object):
         # Write registration to database
         try:
             conn = mysql.connect()
+            return self.write_registration(conn)
+        finally: 
+            conn.close()
+
+    def write_registration(self, conn):
+        try:
             cursor = conn.cursor()
             
             for student_email in self.student_emails:
@@ -36,14 +46,20 @@ class RegistrationService(object):
             return {"message": MSG_REGISTRATION_SERVER_ERROR}, STATUS_CODE_SERVER_ERROR
         finally: 
             cursor.close()
-            conn.close()
-    
+            
     def is_valid_input(self):
-        return self.teacher_email and self.student_emails and len(self.student_emails) != 0
+        if not (self.teacher_email and self.student_emails):
+            return False
+        for student_email in self.student_emails:
+            if not student_email:
+                return False
+        return True
 
 class CommonStudentsService(object):
     def __init__(self, request, teacher_emails=None):
-        if not teacher_emails:
+        if not ((request and request.args.getlist('teacher')) or teacher_emails):
+            self.teacher_emails = None
+        elif not teacher_emails:
             self.teacher_emails = request.args.getlist('teacher')
         else:
             self.teacher_emails = teacher_emails
@@ -56,12 +72,19 @@ class CommonStudentsService(object):
         # Get list of common students from database
         try:
             conn = mysql.connect()
+            return self.get_common_students(conn)
+        finally:
+            conn.close()
+
+    def get_common_students(self, conn):
+        try:
             cursor = conn.cursor()
 
             results = []
             for teacher_email in self.teacher_emails:
                 registration = Registration(teacher_email, None)
                 cursor.execute(registration.search_students())
+                conn.commit()
 
                 if len(results) == 0:
                     results.extend(list(list(itertools.chain.from_iterable(cursor))))
@@ -74,15 +97,22 @@ class CommonStudentsService(object):
             return {"message": MSG_LIST_STUDENTS_SERVER_ERROR}, STATUS_CODE_SERVER_ERROR
         finally: 
             cursor.close()
-            conn.close()
 
     def is_valid_input(self):
-        return self.teacher_emails and len(self.teacher_emails) != 0
+        if not self.teacher_emails:
+            return False
+        for teacher_email in self.teacher_emails:
+            if not teacher_email:
+                return False
+        return True
 
 class SuspendStudentService(object):
     def __init__(self, request):
         request_json = request.json
-        self.student_email = request_json['student']
+        if 'student' not in request_json:
+            self.student_email = None
+        else:
+            self.student_email = request_json['student']
 
     def suspend_student(self):
         # Input validation
@@ -92,6 +122,12 @@ class SuspendStudentService(object):
         # Write suspension into student table
         try:
             conn = mysql.connect()
+            return self.write_suspension(conn)
+        finally:
+            conn.close()
+    
+    def write_suspension(self, conn):
+        try:
             cursor = conn.cursor()
 
             student = Student(self.student_email, 'true')
@@ -104,16 +140,19 @@ class SuspendStudentService(object):
             return {"message": MSG_SUSPENSION_SERVER_ERROR}, STATUS_CODE_SERVER_ERROR
         finally:
             cursor.close()
-            conn.close()
 
     def is_valid_input(self):
-        return self.student_email and len(self.student_email) != 0
+        return bool(self.student_email)
 
 class StudentsToNotifyService(object):
     def __init__(self, request):
         request_json = request.json
-        self.teacher_email = request_json['teacher']
-        self.notification = request_json['notification']
+        if not ('teacher' in request_json and 'notification' in request_json):
+            self.teacher_email = None
+            self.notification = None
+        else:
+            self.teacher_email = request_json['teacher']
+            self.notification = request_json['notification']
     
     def retrieve_students_to_notify(self):
         # Input validation
@@ -128,20 +167,24 @@ class StudentsToNotifyService(object):
         cands = list(set(cands))
 
         # Return only the students that are not suspended
-        student = Student(None, None)
         try:
             conn = mysql.connect()
+            return self.remove_suspended_students(conn, cands)
+        finally:
+            conn.close()
+    
+    def remove_suspended_students(self, conn, cands):
+        student = Student(None, None)
+        try:
             cursor = conn.cursor()
             cursor.execute(student.check_suspension(emails=cands))
             recipients = list(itertools.chain.from_iterable(cursor))
-
             return {"recipients": recipients}, STATUS_CODE_GET_SUCCESS
         except Exception as e:
             print(e)
             return MSG_NOTIFY_SERVER_ERROR, STATUS_CODE_SERVER_ERROR
         finally:
             cursor.close()
-            conn.close()
 
     def get_registered_students(self):
         common_students_service = CommonStudentsService(None, teacher_emails=[self.teacher_email])
@@ -154,7 +197,7 @@ class StudentsToNotifyService(object):
         return [str[1:] for str in re.findall(r'@[\w\.-]+@[\w\.-]+', self.notification)]
 
     def is_valid_input(self):
-        return self.teacher_email and self.notification and len(self.teacher_email) != 0
+        return bool(self.notification is not None and self.teacher_email)
 
 
 
