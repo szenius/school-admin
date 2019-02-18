@@ -12,8 +12,12 @@ class RegistrationService(object):
 
     def __init__(self, request):
         request_json = request.json
-        self.teacher_email = request_json['teacher']
-        self.student_emails = request_json['students']
+        if not ('teacher' in request_json and 'students' in request_json):
+            self.teacher_email = None
+            self.student_emails = None 
+        else:
+            self.teacher_email = request_json['teacher']
+            self.student_emails = request_json['students']
 
     def register_students(self):
         # Input validation
@@ -45,11 +49,18 @@ class RegistrationService(object):
             cursor.close()
             
     def is_valid_input(self):
-        return self.teacher_email and self.student_emails and len(self.student_emails) != 0
+        if not (self.teacher_email and self.student_emails):
+            return False
+        for student_email in self.student_emails:
+            if not student_email:
+                return False
+        return True
 
 class CommonStudentsService(object):
     def __init__(self, request, teacher_emails=None):
-        if not teacher_emails:
+        if not ((request and request.args.getlist('teacher')) or teacher_emails):
+            self.teacher_emails = None
+        elif not teacher_emails:
             self.teacher_emails = request.args.getlist('teacher')
         else:
             self.teacher_emails = teacher_emails
@@ -83,12 +94,20 @@ class CommonStudentsService(object):
             conn.close()
 
     def is_valid_input(self):
-        return self.teacher_emails and len(self.teacher_emails) != 0
+        if not self.teacher_emails:
+            return False
+        for teacher_email in self.teacher_emails:
+            if not teacher_email:
+                return False
+        return True
 
 class SuspendStudentService(object):
     def __init__(self, request):
         request_json = request.json
-        self.student_email = request_json['student']
+        if 'student' not in request_json:
+            self.student_email = None
+        else:
+            self.student_email = request_json['student']
 
     def suspend_student(self):
         # Input validation
@@ -113,13 +132,17 @@ class SuspendStudentService(object):
             conn.close()
 
     def is_valid_input(self):
-        return self.student_email and len(self.student_email) != 0
+        return bool(self.student_email)
 
 class StudentsToNotifyService(object):
     def __init__(self, request):
         request_json = request.json
-        self.teacher_email = request_json['teacher']
-        self.notification = request_json['notification']
+        if not ('teacher' in request_json and 'notification' in request_json):
+            self.teacher_email = None
+            self.notification = None
+        else:
+            self.teacher_email = request_json['teacher']
+            self.notification = request_json['notification']
     
     def retrieve_students_to_notify(self):
         # Input validation
@@ -160,7 +183,7 @@ class StudentsToNotifyService(object):
         return [str[1:] for str in re.findall(r'@[\w\.-]+@[\w\.-]+', self.notification)]
 
     def is_valid_input(self):
-        return self.teacher_email and self.notification and len(self.teacher_email) != 0
+        return bool(self.notification is not None and self.teacher_email)
 
 
 

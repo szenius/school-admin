@@ -3,6 +3,7 @@ from src.service import RegistrationService, CommonStudentsService, SuspendStude
 from flask import Flask
 from flaskext.mysql import MySQL
 import json
+from src.response_templates import *
 
 class TestService(unittest.TestCase):
 
@@ -22,13 +23,47 @@ class TestService(unittest.TestCase):
         cursor = conn.cursor()
         cursor.callproc('init_db')
 
-    def test_registration_service(self):
-        mock_request = MockPostRequest({"teacher": "teacher1@example.com", "students": ["student1@example.com", "student2@example.com"]})
-        service = RegistrationService(mock_request)
+    def test_registration_service_input_val(self):
+        self.input_val_helper(RegistrationService(MockPostRequest({"teacher": "teacher1@example.com", "students": ["student1@example.com", "student2@example.com"]})), True)
+        self.input_val_helper(RegistrationService(MockPostRequest({})), False)
+        self.input_val_helper(RegistrationService(MockPostRequest({"teacher": "", "students": ["student1@example.com", "student2@example.com"]})), False)
+        self.input_val_helper(RegistrationService(MockPostRequest({"teacher": "teacher1@example.com", "students": ["", "student2@example.com"]})), False)
+        self.input_val_helper(RegistrationService(MockPostRequest({"teacher": "teacher1@example.com", "students": []})), False)
+
+    def test_common_students_service_input_val(self):
+        self.input_val_helper(CommonStudentsService(MockGetRequest({"teacher": ["teacher1@example.com", "teacher2@example.com"]})), True)
+        self.input_val_helper(CommonStudentsService(MockGetRequest({"teacher": ["", "teacher2@example.com"]})), False)
+        self.input_val_helper(CommonStudentsService(MockGetRequest({"teacher": []})), False)
+        self.input_val_helper(CommonStudentsService(MockGetRequest({})), False)
+
+    def test_suspend_student_service_input_val(self):
+        self.input_val_helper(SuspendStudentService(MockPostRequest({"student": "student1@example.com"})), True)
+        self.input_val_helper(SuspendStudentService(MockPostRequest({"student": ""})), False)
+        self.input_val_helper(SuspendStudentService(MockPostRequest({})), False)
+    
+    def test_students_to_notify_service_input_val(self):
+        self.input_val_helper(StudentsToNotifyService(MockPostRequest({"teacher": "teacher1@example.com", "notification": "@student1@example.com"})), True)
+        self.input_val_helper(StudentsToNotifyService(MockPostRequest({"teacher": "teacher1@example.com", "notification": ""})), True)
+        self.input_val_helper(StudentsToNotifyService(MockPostRequest({"teacher": "", "notification": "@student1@example.com"})), False)
+        self.input_val_helper(StudentsToNotifyService(MockPostRequest({})), False)
+
+    def input_val_helper(self, service, expected):
+        self.assertEqual(expected, service.is_valid_input())
 
 class MockPostRequest(object):
     def __init__(self, json_data):
         self.json = json_data
+
+class MockGetRequest(object):
+    def __init__(self, data):
+        self.args = Args(data)
+
+class Args(object):
+    def __init__(self, data):
+        self.data = data
+    
+    def getlist(self, key):
+        return self.data[key] if key in self.data else None
 
 if __name__ == '__main__':
     unittest.main() 
