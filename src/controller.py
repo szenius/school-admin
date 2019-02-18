@@ -1,5 +1,8 @@
 from flask import jsonify, flash, request
-from .service.service import RegistrationService, CommonStudentsService, SuspendStudentService, StudentsToNotifyService
+from .service.registration_service import RegistrationService
+from .service.common_students_service import CommonStudentsService
+from .service.suspend_students_service import SuspendStudentService
+from .service.notify_students_service import StudentsToNotifyService
 from .app import app
 
 @app.route('/api/register', methods=['POST'])
