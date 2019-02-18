@@ -18,6 +18,8 @@ To start the Flask application, please run the following from the root directory
 python run.py
 ```
 
+Here's a [Postman collection](https://www.getpostman.com/collections/374ea00428490c14bff7) for you to get started on some example requests.
+
 ### Running unit tests
 To run unit tests, please run the following from the root directory.
 ```
