@@ -56,6 +56,10 @@ class RegistrationService(object):
         return True
 
 class CommonStudentsService(object):
+    '''
+    Service object that takes care of listing students who are all registered to a given group of teachers.
+    '''
+
     def __init__(self, request, teacher_emails=None):
         if not ((request and request.args.getlist('teacher')) or teacher_emails):
             self.teacher_emails = None
@@ -107,6 +111,10 @@ class CommonStudentsService(object):
         return True
 
 class SuspendStudentService(object):
+    '''
+    Service object that takes care of suspending a specified student.
+    '''
+
     def __init__(self, request):
         request_json = request.json
         if 'student' not in request_json:
@@ -145,6 +153,10 @@ class SuspendStudentService(object):
         return bool(self.student_email)
 
 class StudentsToNotifyService(object):
+    '''
+    Service object that retrieves students to be notified.
+    '''
+
     def __init__(self, request):
         request_json = request.json
         if not ('teacher' in request_json and 'notification' in request_json):
