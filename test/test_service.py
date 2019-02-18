@@ -17,8 +17,13 @@ class TestService(unittest.TestCase):
         self.app.config['MYSQL_DATABASE_HOST'] = 'localhost'
         self.mysql_test.init_app(self.app)
 
+        # Initialize test database
+        conn = self.mysql_test.connect()
+        cursor = conn.cursor()
+        cursor.callproc('init_db')
+
     def test_registration_service(self):
-        mock_request = MockPostRequest({"teacher": "teacher@example.com", "students": ["student1@example.com", "student2@example.com"]})
+        mock_request = MockPostRequest({"teacher": "teacher1@example.com", "students": ["student1@example.com", "student2@example.com"]})
         service = RegistrationService(mock_request)
 
 class MockPostRequest(object):
